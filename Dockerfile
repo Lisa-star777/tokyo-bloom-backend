@@ -23,12 +23,22 @@ RUN docker-php-ext-install \
     zip \
     xml
 
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Настройка CORS на уровне Apache
+RUN echo '<IfModule mod_headers.c>\n\
+    Header always set Access-Control-Allow-Origin "*"\n\
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"\n\
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN"\n\
+    Header always set Access-Control-Allow-Credentials "true"\n\
+    </IfModule>' > /etc/apache2/conf-available/cors.conf
+
+RUN a2enconf cors
 
 COPY . /var/www/html/
 WORKDIR /var/www/html/
