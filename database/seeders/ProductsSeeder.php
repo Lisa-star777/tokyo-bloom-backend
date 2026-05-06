@@ -17,6 +17,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'bouquets',
                 'description' => 'Нежный букет из пионов и эустомы',
                 'materials' => 'Пионы, эустома, зелень',
+                'image_url' => 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?w=600',
             ],
             [
                 'title' => 'Счастье',
@@ -24,6 +25,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'bouquets',
                 'description' => 'Яркий букет из роз и гербер',
                 'materials' => 'Розы, герберы, альстромерия',
+                'image_url' => 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600',
             ],
             [
                 'title' => 'Любовь',
@@ -31,6 +33,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'bouquets',
                 'description' => 'Роскошный букет из 101 розы',
                 'materials' => 'Розы красные',
+                'image_url' => 'https://images.unsplash.com/photo-1546842931-886c185b4c8c?w=600',
             ],
             [
                 'title' => 'Весеннее настроение',
@@ -38,6 +41,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'bouquets',
                 'description' => 'Яркий весенний букет',
                 'materials' => 'Тюльпаны, ирисы, гипсофила',
+                'image_url' => 'https://images.unsplash.com/photo-1589123053646-4e8c49d46b0a?w=600',
             ],
             
             // Подарки
@@ -47,6 +51,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'gifts',
                 'description' => 'Плюшевый мишка',
                 'materials' => 'Плюш, текстиль',
+                'image_url' => 'https://images.unsplash.com/photo-1559715541-5daf8a5a4a3a?w=600',
             ],
             [
                 'title' => 'Шоколад премиум',
@@ -54,6 +59,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'gifts',
                 'description' => 'Коробка бельгийского шоколада',
                 'materials' => 'Шоколад, упаковка',
+                'image_url' => 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=600',
             ],
             [
                 'title' => 'Воздушные шары',
@@ -61,6 +67,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'gifts',
                 'description' => 'Набор гелиевых шаров',
                 'materials' => 'Латекс, гелий, лента',
+                'image_url' => 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600',
             ],
             
             // Цветы в коробках
@@ -70,6 +77,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'box-flowers',
                 'description' => 'Элегантная композиция из роз в коробке',
                 'materials' => 'Розы, коробка, флористическая губка',
+                'image_url' => 'https://images.unsplash.com/photo-1561181286-d4243e45d33e?w=600',
             ],
             [
                 'title' => 'Пионы в коробке',
@@ -77,6 +85,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'box-flowers',
                 'description' => 'Нежные пионы в стильной коробке',
                 'materials' => 'Пионы, коробка, флористическая губка',
+                'image_url' => 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600',
             ],
             [
                 'title' => 'Микс цветов в коробке',
@@ -84,6 +93,7 @@ class ProductsSeeder extends Seeder
                 'category' => 'box-flowers',
                 'description' => 'Ассорти из роз, хризантем и гипсофилы',
                 'materials' => 'Розы, хризантемы, гипсофила, коробка',
+                'image_url' => 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600',
             ],
         ];
 

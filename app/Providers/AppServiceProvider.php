@@ -18,9 +18,12 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-    {
-    if (app()->environment('production')) {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+{
+    if (app()->environment('production') && \App\Models\Product::count() === 0) {
+        \Illuminate\Support\Facades\Artisan::call('db:seed', [
+            '--class' => 'ProductSeeder',
+            '--force' => true
+        ]);
     }
-    }
+}
 }

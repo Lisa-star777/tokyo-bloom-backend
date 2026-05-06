@@ -28,6 +28,33 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'cloudinary-labs/cloudinary-laravel' => array(
+            'pretty_version' => '2.3.0',
+            'version' => '2.3.0.0',
+            'reference' => 'ed74eec3b2453ae307e2dda7e8c5cf9556f4daa3',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../cloudinary-labs/cloudinary-laravel',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'cloudinary/cloudinary_php' => array(
+            'pretty_version' => '2.14.0',
+            'version' => '2.14.0.0',
+            'reference' => '5967558bbf5d88e851ebd554559e850ac45b9236',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../cloudinary/cloudinary_php',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'cloudinary/transformation-builder-sdk' => array(
+            'pretty_version' => '1.5.0',
+            'version' => '1.5.0.0',
+            'reference' => '8c225472e96291a7af23ddf8947bdf31baac403e',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../cloudinary/transformation-builder-sdk',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'cordoval/hamcrest-php' => array(
             'dev_requirement' => true,
             'replaced' => array(
