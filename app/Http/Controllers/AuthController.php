@@ -5,28 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     // Регистрация
     public function register(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'bonuses' => 500,
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'bonuses' => 500, // Приветственные бонусы
             'is_admin' => false,
         ]);
-
-        // Создаем корзину для пользователя
-        $user->cart()->create();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -36,20 +34,20 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // Вход
+    // Логин
     public function login(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $validated['email'])->first();
+        $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($validated['password'], $user->password)) {
-            return response()->json([
-                'message' => 'Неверный email или пароль'
-            ], 401);
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['Неверный email или пароль.'],
+            ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -64,28 +62,21 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        
-        return response()->json(['message' => 'Выход выполнен']);
+
+        return response()->json(['message' => 'Вы вышли из системы']);
     }
 
-    // Получить текущего пользователя
+    // Текущий пользователь
     public function user(Request $request)
     {
         return response()->json($request->user());
     }
 
-    // Обновить профиль
-    public function update(Request $request)
+    // Проверка на админа
+    public function checkAdmin(Request $request)
     {
-        $user = $request->user();
-        
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+        return response()->json([
+            'is_admin' => $request->user()->is_admin
         ]);
-        
-        $user->update($validated);
-        
-        return response()->json($user);
     }
 }
