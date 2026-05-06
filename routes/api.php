@@ -54,6 +54,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/certificates', [CertificateController::class, 'index']);
         Route::post('/certificates', [CertificateController::class, 'store']);
         Route::post('/certificates/validate', [CertificateController::class, 'checkValidity']);
+        Route::post('/certificates/use', [CertificateController::class, 'use']);
     });
     
     // ========== Админские маршруты ==========

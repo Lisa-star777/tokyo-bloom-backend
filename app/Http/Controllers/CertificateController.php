@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Certificate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CertificateCreated;
 
 class CertificateController extends Controller
 {
@@ -38,9 +40,26 @@ class CertificateController extends Controller
                 'expires_at' => $expiresAt,
             ]);
             
+            // === ОТПРАВКА EMAIL ===
+            try {
+                $user = $request->user();
+                if ($user && $user->email) {
+                    Mail::to($user->email)->send(new CertificateCreated($certificate, $user));
+                    \Log::info('Certificate email отправлен на ' . $user->email);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Ошибка отправки email сертификата: ' . $e->getMessage());
+            }
+            
             return response()->json($certificate, 201);
             
         } catch (\Exception $e) {
+            \Log::error('Certificate creation failed', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
             return response()->json([
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -49,7 +68,6 @@ class CertificateController extends Controller
         }
     }
     
-    // Переименовали метод с validate на checkValidity
     public function checkValidity(Request $request)
     {
         $validated = $request->validate([
@@ -83,5 +101,36 @@ class CertificateController extends Controller
             'valid' => true,
             'certificate' => $certificate
         ]);
+    }
+    
+    public function use(Request $request)
+    {
+        $validated = $request->validate([
+            'code' => 'required|string',
+            'order_id' => 'required|integer',
+        ]);
+        
+        $certificate = Certificate::where('code', $validated['code'])->first();
+        
+        if (!$certificate) {
+            return response()->json(['error' => 'Сертификат не найден'], 404);
+        }
+        
+        if ($certificate->status !== 'active') {
+            return response()->json(['error' => 'Сертификат уже использован'], 400);
+        }
+        
+        if ($certificate->expires_at < now()) {
+            return response()->json(['error' => 'Срок действия сертификата истек'], 400);
+        }
+        
+        $certificate->update([
+            'status' => 'used',
+            'used_at' => now(),
+            'used_by' => $request->user()->id,
+            'order_id' => $validated['order_id'],
+        ]);
+        
+        return response()->json(['message' => 'Сертификат активирован']);
     }
 }
