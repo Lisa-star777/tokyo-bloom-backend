@@ -32,10 +32,13 @@ RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /e
 
 # Настройка CORS на уровне Apache
 RUN echo '<IfModule mod_headers.c>\n\
-    Header always set Access-Control-Allow-Origin "*"\n\
+    SetEnvIf Origin "^https://tokyo-bloom.onrender.com$" CORS_ALLOW=$0\n\
+    SetEnvIf Origin "^http://localhost:5173$" CORS_ALLOW=$0\n\
+    Header always set Access-Control-Allow-Origin "%{CORS_ALLOW}e" env=CORS_ALLOW\n\
     Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"\n\
     Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN"\n\
     Header always set Access-Control-Allow-Credentials "true"\n\
+    Header merge Vary Origin\n\
     </IfModule>' > /etc/apache2/conf-available/cors.conf
 
 RUN a2enconf cors
