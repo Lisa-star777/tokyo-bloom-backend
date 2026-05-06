@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: tokyo-bloom-api
+    runtime: php
+    buildCommand: composer install --no-dev --optimize-autoloader && php artisan config:clear && php artisan route:clear && php artisan view:clear
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        value: base64:6kV2vy71T6yT1gbhefofw4vXh3C8pAFjUKZtx/LOG44=
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d7tbq057vvec73e1iru0-a.frankfurt-postgres.render.com
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: tokyo_bloom
+      - key: DB_USERNAME
+        value: tokyo_bloom_user
+      - key: DB_PASSWORD
+        value: q3W0R3xw6PbvBVoZmyU6QP9h48cz6Wuq
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
