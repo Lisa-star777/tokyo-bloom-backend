@@ -31,7 +31,7 @@ RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-avail
 RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Настройка CORS на уровне Apache
-RUN echo '<IfModule mod_headers.c>\n\
+
     SetEnvIf Origin "^https://tokyo-bloom.onrender.com$" CORS_ALLOW=$0\n\
     SetEnvIf Origin "^http://localhost:5173$" CORS_ALLOW=$0\n\
     Header always set Access-Control-Allow-Origin "%{CORS_ALLOW}e" env=CORS_ALLOW\n\
@@ -41,7 +41,7 @@ RUN echo '<IfModule mod_headers.c>\n\
     Header merge Vary Origin\n\
     </IfModule>' > /etc/apache2/conf-available/cors.conf
 
-RUN a2enconf cors
+
 
 COPY . /var/www/html/
 WORKDIR /var/www/html/
