@@ -23,28 +23,27 @@ RUN docker-php-ext-install \
     zip \
     xml
 
-RUN a2enmod rewrite headers
+RUN a2enmod rewrite
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Правильный CORS для Laravel (один источник!)
+COPY . /var/www/html/
+WORKDIR /var/www/html/
+
+# Перезаписываем config/cors.php ПРАВИЛЬНЫМИ настройками
 RUN echo "<?php return [ \
-    'paths' => ['api/*', 'sanctum/csrf-cookie'], \
+    'paths' => ['api/*'], \
     'allowed_methods' => ['*'], \
-    'allowed_origins' => ['https://tokyo-bloom.onrender.com', 'http://localhost:5173'], \
+    'allowed_origins' => ['https://tokyo-bloom.onrender.com'], \
     'allowed_origins_patterns' => [], \
     'allowed_headers' => ['*'], \
     'exposed_headers' => [], \
-    'max_age' => 0, \
+    'max_age' => 86400, \
     'supports_credentials' => true, \
 ];" > /var/www/html/config/cors.php
-
-
-COPY . /var/www/html/
-WORKDIR /var/www/html/
 
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts
 
