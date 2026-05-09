@@ -23,25 +23,20 @@ RUN docker-php-ext-install \
     zip \
     xml
 
-RUN a2enmod rewrite headers
+RUN a2enmod rewrite
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN echo '<VirtualHost *:80>\n\
+    DocumentRoot /var/www/html/public\n\
+    <Directory /var/www/html/public>\n\
+        Options Indexes FollowSymLinks\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Настройка CORS на уровне Apache
-RUN echo '<IfModule mod_headers.c>\n\
-    SetEnvIf Origin "^https://tokyo-bloom.onrender.com$" CORS_ALLOW=$0\n\
-    SetEnvIf Origin "^http://localhost:5173$" CORS_ALLOW=$0\n\
-    Header always set Access-Control-Allow-Origin "%{CORS_ALLOW}e" env=CORS_ALLOW\n\
-    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"\n\
-    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN"\n\
-    Header always set Access-Control-Allow-Credentials "true"\n\
-    Header merge Vary Origin\n\
-    </IfModule>' > /etc/apache2/conf-available/cors.conf
-
-RUN a2enconf cors
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 COPY . /var/www/html/
 WORKDIR /var/www/html/

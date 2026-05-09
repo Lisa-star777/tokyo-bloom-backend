@@ -53,7 +53,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         
         // Сертификаты
-        Route::get('/certificates', [CertificateController::class, 'index']);
         Route::post('/certificates', [CertificateController::class, 'store']);
         Route::post('/certificates/validate', [CertificateController::class, 'checkValidity']);
         Route::post('/certificates/use', [CertificateController::class, 'use']);
@@ -70,23 +69,9 @@ Route::prefix('v1')->group(function () {
             Route::delete('/certificates/{certificate}', [AdminCertificateController::class, 'destroy']);
             Route::get('/feedback', [AdminFeedbackController::class, 'index']);
             Route::put('/feedback/{feedback}/read', [AdminFeedbackController::class, 'markAsRead']);
-            Route::post('/feedback/{feedback}/reply', [AdminFeedbackController::class, 'sendReply']);
             Route::get('/stats', [DashboardController::class, 'stats']);
         });
     });
-    
-    // ========== Тестовые маршруты ==========
-    Route::post('/test-cert', function (Request $request) {
-        return response()->json([
-            'message' => 'Test работает!',
-            'data' => $request->all()
-        ]);
-    });
-});
-
-// ========== Тестовые маршруты вне префикса v1 ==========
-Route::post('/test-simple', function (Request $request) {
-    return response()->json(['message' => 'Simple test works!']);
 });
 
 // Тестовый маршрут с авторизацией
