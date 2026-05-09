@@ -33,7 +33,10 @@ RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /e
 COPY . /var/www/html/
 WORKDIR /var/www/html/
 
-# Перезаписываем config/cors.php ПРАВИЛЬНЫМИ настройками
+# Удаляем закешированный конфиг
+RUN rm -f /var/www/html/bootstrap/cache/config.php
+
+# Создаём правильный config/cors.php
 RUN echo "<?php return [ \
     'paths' => ['api/*'], \
     'allowed_methods' => ['*'], \
