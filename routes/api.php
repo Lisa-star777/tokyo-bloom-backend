@@ -22,7 +22,7 @@ use App\Http\Controllers\Admin\DashboardController;
 */
 
 Route::prefix('v1')->group(function () {
-    
+   
     // ========== Публичные маршруты ==========
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{product}', [ProductController::class, 'show']);
@@ -31,12 +31,14 @@ Route::prefix('v1')->group(function () {
     // ========== Аутентификация ==========
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-    Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
-    Route::put('/user', [AuthController::class, 'update'])->middleware('auth:sanctum');
     
     // ========== Защищенные маршруты ==========
     Route::middleware('auth:sanctum')->group(function () {
+        
+        // Профиль
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/user', [AuthController::class, 'user']);
+        Route::put('/user', [AuthController::class, 'update']);
         
         // Корзина
         Route::get('/cart', [CartController::class, 'index']);
@@ -55,24 +57,23 @@ Route::prefix('v1')->group(function () {
         Route::post('/certificates', [CertificateController::class, 'store']);
         Route::post('/certificates/validate', [CertificateController::class, 'checkValidity']);
         Route::post('/certificates/use', [CertificateController::class, 'use']);
+        
+        // ========== Админские маршруты ==========
+        Route::middleware('admin')->prefix('admin')->group(function () {
+            Route::apiResource('products', AdminProductController::class);
+            Route::get('/orders', [AdminOrderController::class, 'index']);
+            Route::put('/orders/{order}', [AdminOrderController::class, 'update']);
+            Route::get('/users', [AdminUserController::class, 'index']);
+            Route::put('/users/{user}/bonuses', [AdminUserController::class, 'updateBonuses']);
+            Route::get('/certificates', [AdminCertificateController::class, 'index']);
+            Route::post('/certificates', [AdminCertificateController::class, 'store']);
+            Route::delete('/certificates/{certificate}', [AdminCertificateController::class, 'destroy']);
+            Route::get('/feedback', [AdminFeedbackController::class, 'index']);
+            Route::put('/feedback/{feedback}/read', [AdminFeedbackController::class, 'markAsRead']);
+            Route::post('/feedback/{feedback}/reply', [AdminFeedbackController::class, 'sendReply']);
+            Route::get('/stats', [DashboardController::class, 'stats']);
+        });
     });
-    
-    // ========== Админские маршруты ==========
-    // ========== Админские маршруты ==========
-Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
-    Route::apiResource('products', AdminProductController::class);
-    Route::get('/orders', [AdminOrderController::class, 'index']);
-    Route::put('/orders/{order}', [AdminOrderController::class, 'update']);
-    Route::get('/users', [AdminUserController::class, 'index']);
-    Route::put('/users/{user}/bonuses', [AdminUserController::class, 'updateBonuses']);
-    Route::get('/certificates', [AdminCertificateController::class, 'index']);
-    Route::post('/certificates', [AdminCertificateController::class, 'store']);
-    Route::delete('/certificates/{certificate}', [AdminCertificateController::class, 'destroy']);
-    Route::get('/feedback', [AdminFeedbackController::class, 'index']);
-    Route::put('/feedback/{feedback}/read', [AdminFeedbackController::class, 'markAsRead']);
-    Route::post('/feedback/{feedback}/reply', [AdminFeedbackController::class, 'sendReply']); // ← ДОБАВЬТЕ ЭТУ СТРОКУ
-    Route::get('/stats', [DashboardController::class, 'stats']);
-});
     
     // ========== Тестовые маршруты ==========
     Route::post('/test-cert', function (Request $request) {
