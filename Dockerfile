@@ -30,17 +30,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Настройка CORS на уровне Apache
-
-    SetEnvIf Origin "^https://tokyo-bloom.onrender.com$" CORS_ALLOW=$0\n\
-    SetEnvIf Origin "^http://localhost:5173$" CORS_ALLOW=$0\n\
-    Header always set Access-Control-Allow-Origin "%{CORS_ALLOW}e" env=CORS_ALLOW\n\
-    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"\n\
-    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN"\n\
-    Header always set Access-Control-Allow-Credentials "true"\n\
-    Header merge Vary Origin\n\
-    </IfModule>' > /etc/apache2/conf-available/cors.conf
-
+# Правильный CORS для Laravel (один источник!)
+RUN echo "<?php return [ \
+    'paths' => ['api/*', 'sanctum/csrf-cookie'], \
+    'allowed_methods' => ['*'], \
+    'allowed_origins' => ['https://tokyo-bloom.onrender.com', 'http://localhost:5173'], \
+    'allowed_origins_patterns' => [], \
+    'allowed_headers' => ['*'], \
+    'exposed_headers' => [], \
+    'max_age' => 0, \
+    'supports_credentials' => true, \
+];" > /var/www/html/config/cors.php
 
 
 COPY . /var/www/html/
