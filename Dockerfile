@@ -23,30 +23,22 @@ RUN docker-php-ext-install \
     zip \
     xml
 
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+# Настройка Apache для CORS
+RUN echo '<VirtualHost *:80>\n\
+    Header set Access-Control-Allow-Origin "https://tokyo-bloom.onrender.com"\n\
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"\n\
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN"\n\
+    Header set Access-Control-Allow-Credentials "true"\n\
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+
+RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
 COPY . /var/www/html/
 WORKDIR /var/www/html/
-
-# Удаляем закешированный конфиг
-RUN rm -f /var/www/html/bootstrap/cache/config.php
-
-# Создаём правильный config/cors.php
-RUN echo "<?php return [ \
-    'paths' => ['api/*'], \
-    'allowed_methods' => ['*'], \
-    'allowed_origins' => ['https://tokyo-bloom.onrender.com'], \
-    'allowed_origins_patterns' => [], \
-    'allowed_headers' => ['*'], \
-    'exposed_headers' => [], \
-    'max_age' => 86400, \
-    'supports_credentials' => true, \
-];" > /var/www/html/config/cors.php
 
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts
 
