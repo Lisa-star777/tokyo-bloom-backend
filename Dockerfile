@@ -27,15 +27,21 @@ RUN a2enmod rewrite headers
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Настройка Apache для CORS
+# Настройка Apache VirtualHost с DocumentRoot = public
 RUN echo '<VirtualHost *:80>\n\
+    DocumentRoot /var/www/html/public\n\
+    <Directory /var/www/html/public>\n\
+        Options Indexes FollowSymLinks\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
     Header set Access-Control-Allow-Origin "https://tokyo-bloom.onrender.com"\n\
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"\n\
     Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN"\n\
     Header set Access-Control-Allow-Credentials "true"\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 COPY . /var/www/html/
 WORKDIR /var/www/html/
