@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'paths' => [],
-    'allowed_methods' => [],
-    'allowed_origins' => [],
+    'paths' => ['api/*'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => ['https://tokyo-bloom.onrender.com'],
     'allowed_origins_patterns' => [],
-    'allowed_headers' => [],
+    'allowed_headers' => ['*'],
     'exposed_headers' => [],
-    'max_age' => 0,
-    'supports_credentials' => false,
+    'max_age' => 86400,
+    'supports_credentials' => true,
 ];
