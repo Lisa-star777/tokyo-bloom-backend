@@ -69,6 +69,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('/certificates/{certificate}', [AdminCertificateController::class, 'destroy']);
             Route::get('/feedback', [AdminFeedbackController::class, 'index']);
             Route::put('/feedback/{feedback}/read', [AdminFeedbackController::class, 'markAsRead']);
+            Route::post('/feedback/{feedback}/reply', [AdminFeedbackController::class, 'sendReply']);
             Route::get('/stats', [DashboardController::class, 'stats']);
         });
     });
