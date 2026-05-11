@@ -6,19 +6,13 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
-public function index()
-{
-    $products = Cache::remember('products', 600, function () {
-        return Product::orderBy('id')->get();
-    });
-    return response()->json($products);
-}
-
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::orderBy('id')->get();
+        $products = Cache::remember('products', 600, function () {
+            return Product::orderBy('id')->get();
+        });
         return response()->json($products);
     }
 
