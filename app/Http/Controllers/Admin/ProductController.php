@@ -18,27 +18,26 @@ class ProductController extends Controller
         $product = Product::create($request->only([
             'title', 'price', 'category', 'description', 'materials', 'image_url'
         ]));
-        
         return response()->json($product, 201);
     }
     
-    public function update(Request $request, Product $product)
+    public function show($id)
     {
+        return response()->json(Product::findOrFail($id));
+    }
+    
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
         $product->update($request->only([
             'title', 'price', 'category', 'description', 'materials', 'image_url'
         ]));
-        
         return response()->json($product);
     }
     
-    public function show(Product $product)
+    public function destroy($id)
     {
-        return response()->json($product);
-    }
-    
-    public function destroy(Product $product)
-    {
-        $product->delete();
+        Product::findOrFail($id)->delete();
         return response()->json(['message' => 'Товар удален']);
     }
 }
