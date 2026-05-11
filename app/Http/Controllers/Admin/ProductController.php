@@ -16,30 +16,36 @@ class ProductController extends Controller
     }
     
     public function store(Request $request)
-    {
-        try {
-            $product = Product::create([
-                'title' => $request->input('title'),
-                'price' => $request->input('price'),
-                'category' => $request->input('category'),
-                'description' => $request->input('description', ''),
-                'materials' => $request->input('materials', ''),
-            ]);
-            
-            if ($request->hasFile('image')) {
-                $uploadedFile = Cloudinary::upload($request->file('image')->getRealPath(), [
-                    'folder' => 'tokyo-bloom/products'
-                ]);
-                $product->image_url = $uploadedFile->getSecurePath();
-                $product->save();
-            }
-            
-            return response()->json($product, 201);
-            
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+{
+    try {
+        $product = Product::create([
+            'title' => $request->input('title'),
+            'price' => $request->input('price'),
+            'category' => $request->input('category'),
+            'description' => $request->input('description', ''),
+            'materials' => $request->input('materials', ''),
+            'image_url' => $request->input('image_url', null),
+        ]);
+        
+        // Если есть и файл, и URL — файл имеет приоритет
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9_.-]/', '_', $file->getClientOriginalName());
+            $path = $file->storeAs('products', $filename, 'public');
+            $product->image_url = '/storage/' . $path;
+            $product->save();
         }
+        
+        return response()->json($product, 201);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
     }
+}
     
     public function update(Request $request, Product $product)
     {
