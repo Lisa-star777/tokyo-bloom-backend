@@ -15,28 +15,18 @@ class ProductController extends Controller
     
     public function store(Request $request)
     {
-        $product = Product::create([
-            'title' => $request->input('title'),
-            'price' => $request->input('price'),
-            'category' => $request->input('category'),
-            'description' => $request->input('description', ''),
-            'materials' => $request->input('materials', ''),
-            'image_url' => $request->input('image_url', null),
-        ]);
+        $product = Product::create($request->only([
+            'title', 'price', 'category', 'description', 'materials', 'image_url'
+        ]));
         
         return response()->json($product, 201);
     }
     
     public function update(Request $request, Product $product)
     {
-        $product->update([
-            'title' => $request->input('title', $product->title),
-            'price' => $request->input('price', $product->price),
-            'category' => $request->input('category', $product->category),
-            'description' => $request->input('description', $product->description),
-            'materials' => $request->input('materials', $product->materials),
-            'image_url' => $request->input('image_url', $product->image_url),
-        ]);
+        $product->update($request->only([
+            'title', 'price', 'category', 'description', 'materials', 'image_url'
+        ]));
         
         return response()->json($product);
     }
