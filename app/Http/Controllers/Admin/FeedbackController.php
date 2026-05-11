@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\FeedbackReply;
 
 class FeedbackController extends Controller
 {
@@ -26,11 +28,14 @@ class FeedbackController extends Controller
             'reply_text' => 'required|string|min:1',
         ]);
         
-        $feedback->update(['status' => 'read']);
-        
-        return response()->json([
-            'message' => 'Ответ отправлен успешно',
-            'reply' => $validated['reply_text']
-        ]);
+        try {
+            Mail::to($feedback->email)->send(new FeedbackReply($feedback->name, $validated['reply_text']));
+            $feedback->update(['status' => 'read']);
+            return response()->json(['message' => 'Ответ отправлен успешно']);
+        } catch (\Exception $e) {
+            \Log::error('Ошибка отправки ответа: ' . $e->getMessage());
+            $feedback->update(['status' => 'read']);
+            return response()->json(['message' => 'Ответ сохранён, но email не отправлен']);
+        }
     }
 }
