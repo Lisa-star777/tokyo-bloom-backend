@@ -9,20 +9,12 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        if (!$user) return response()->json(['items' => []]);
-
-        $cart = $user->cart;
+        $cart = $request->user() ? $request->user()->cart : null;
         if (!$cart) return response()->json(['items' => []]);
         
         $items = $cart->items()->with('product')->get();
         return response()->json(['items' => $items->map(function ($item) {
-            return [
-                'id' => $item->product_id,
-                'title' => $item->product->title,
-                'price' => $item->product->price,
-                'quantity' => $item->quantity,
-            ];
+            return ['id' => $item->product_id, 'title' => $item->product->title, 'price' => $item->product->price, 'quantity' => $item->quantity];
         })]);
     }
     
@@ -31,39 +23,38 @@ class CartController extends Controller
         $user = $request->user();
         if (!$user) return response()->json(['message' => 'Требуется авторизация'], 401);
 
-        $validated = $request->validate(['product_id' => 'required|exists:products,id', 'quantity' => 'integer|min:1|max:99']);
         $cart = $user->cart ?? $user->cart()->create();
-        $quantity = $validated['quantity'] ?? 1;
+        $productId = $request->input('product_id');
+        $quantity = $request->input('quantity', 1);
         
-        $cartItem = CartItem::where('cart_id', $cart->id)->where('product_id', $validated['product_id'])->first();
-        if ($cartItem) { $cartItem->quantity += $quantity; $cartItem->save(); }
-        else { CartItem::create(['cart_id' => $cart->id, 'product_id' => $validated['product_id'], 'quantity' => $quantity]); }
+        $item = CartItem::where('cart_id', $cart->id)->where('product_id', $productId)->first();
+        if ($item) { $item->quantity += $quantity; $item->save(); }
+        else { CartItem::create(['cart_id' => $cart->id, 'product_id' => $productId, 'quantity' => $quantity]); }
         
         return response()->json(['message' => 'Товар добавлен']);
     }
     
     public function updateQuantity(Request $request, $productId)
     {
-        $cart = $request->user()->cart;
+        $cart = $request->user()->cart ?? null;
         if (!$cart) return response()->json(['message' => 'Корзина пуста'], 404);
-        $cartItem = CartItem::where('cart_id', $cart->id)->where('product_id', $productId)->first();
-        if (!$cartItem) return response()->json(['message' => 'Товар не найден'], 404);
-        $quantity = $request->input('quantity', 0);
-        if ($quantity <= 0) { $cartItem->delete(); return response()->json(['message' => 'Удалено']); }
-        $cartItem->quantity = $quantity; $cartItem->save();
-        return response()->json(['message' => 'Обновлено']);
+        $item = CartItem::where('cart_id', $cart->id)->where('product_id', $productId)->first();
+        if (!$item) return response()->json(['message' => 'Не найдено'], 404);
+        $qty = $request->input('quantity', 0);
+        $qty <= 0 ? $item->delete() : ($item->quantity = $qty) && $item->save();
+        return response()->json(['message' => 'OK']);
     }
     
     public function removeItem($productId)
     {
-        $cart = request()->user()->cart;
+        $cart = request()->user()->cart ?? null;
         if ($cart) CartItem::where('cart_id', $cart->id)->where('product_id', $productId)->delete();
         return response()->json(['message' => 'Удалено']);
     }
     
     public function clear(Request $request)
     {
-        $cart = $request->user()->cart;
+        $cart = $request->user()->cart ?? null;
         if ($cart) $cart->items()->delete();
         return response()->json(['message' => 'Очищено']);
     }
