@@ -28,6 +28,13 @@ Route::prefix('v1')->group(function () {
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::post('/feedback', [FeedbackController::class, 'store']);
     
+    // Корзина (доступна всем, даже гостям)
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart/items', [CartController::class, 'addItem']);
+    Route::put('/cart/items/{productId}', [CartController::class, 'updateQuantity']);
+    Route::delete('/cart/items/{productId}', [CartController::class, 'removeItem']);
+    Route::delete('/cart', [CartController::class, 'clear']);
+    
     // ========== Аутентификация ==========
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -39,13 +46,6 @@ Route::prefix('v1')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::put('/user', [AuthController::class, 'update']);
-        
-        // Корзина
-        Route::get('/cart', [CartController::class, 'index']);
-        Route::post('/cart/items', [CartController::class, 'addItem']);
-        Route::put('/cart/items/{productId}', [CartController::class, 'updateQuantity']);
-        Route::delete('/cart/items/{productId}', [CartController::class, 'removeItem']);
-        Route::delete('/cart', [CartController::class, 'clear']);
         
         // Заказы
         Route::get('/orders', [OrderController::class, 'index']);
@@ -69,15 +69,12 @@ Route::prefix('v1')->group(function () {
             Route::delete('/certificates/{certificate}', [AdminCertificateController::class, 'destroy']);
             Route::get('/feedback', [AdminFeedbackController::class, 'index']);
             Route::put('/feedback/{feedback}/read', [AdminFeedbackController::class, 'markAsRead']);
+            Route::post('/feedback/{feedback}/reply', [AdminFeedbackController::class, 'sendReply']);
             Route::get('/stats', [DashboardController::class, 'stats']);
         });
     });
 });
 
-// Тестовый маршрут с авторизацией
 Route::middleware('auth:sanctum')->post('/test-auth', function (Request $request) {
-    return response()->json([
-        'message' => 'Auth работает!',
-        'user' => $request->user()->name
-    ]);
+    return response()->json(['message' => 'Auth работает!', 'user' => $request->user()->name]);
 });
