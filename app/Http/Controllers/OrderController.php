@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\CartItem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderConfirmation;
 
 class OrderController extends Controller
 {
@@ -23,15 +20,12 @@ class OrderController extends Controller
     {
         try {
             $user = $request->user();
-            
-            // Получаем корзину пользователя
             $cart = $user->cart;
             
             if (!$cart || $cart->items->count() === 0) {
                 return response()->json(['message' => 'Корзина пуста'], 400);
             }
             
-            // Формируем список товаров
             $items = [];
             $subtotal = 0;
             
@@ -54,7 +48,6 @@ class OrderController extends Controller
             
             $bonusesEarned = floor($subtotal * 0.1);
             
-            // Создаем заказ
             $order = Order::create([
                 'user_id' => $user->id,
                 'items' => $items,
@@ -69,20 +62,10 @@ class OrderController extends Controller
                 'status' => 'new',
                 'status_text' => 'Новый',
             ]);
-
-            // Отправка email
-                try {
-                    Mail::to($user->email)->send(new OrderConfirmation($order, $user));
-                    \Log::info('Email отправлен на ' . $user->email);
-                } catch (\Exception $e) {
-                    \Log::error('Ошибка отправки email: ' . $e->getMessage());
-                }
             
-            // Обновляем бонусы пользователя
             $user->bonuses = $user->bonuses - $bonusesUsed + $bonusesEarned;
             $user->save();
             
-            // Очищаем корзину
             $cart->items()->delete();
             
             return response()->json($order, 201);
