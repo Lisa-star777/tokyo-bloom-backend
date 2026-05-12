@@ -1,6 +1,6 @@
 <?php
 
-header('Access-Control-Allow-Origin: https://tokyo-bloom.onrender.com');
+header('Access-Control-Allow-Origin: https://tokyo-bloom-777.onrender.com');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept');
 header('Access-Control-Allow-Credentials: true');
