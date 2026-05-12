@@ -78,9 +78,11 @@ class CartController extends Controller
     
     private function getCart(Request $request)
     {
-        if ($user = $request->user()) return $user->cart;
-        $cartId = $request->session()->get('guest_cart_id');
-        return $cartId ? Cart::find($cartId) : null;
+        if ($user = $request->user()) {
+            return $user->cart;
+        }
+        $sessionId = $request->session()->getId();
+        return Cart::where('session_id', $sessionId)->first();
     }
     
     private function getOrCreateCart(Request $request)
@@ -88,10 +90,9 @@ class CartController extends Controller
         if ($user = $request->user()) {
             return $user->cart ?? $user->cart()->create();
         }
-        $cartId = $request->session()->get('guest_cart_id');
-        if ($cartId && $cart = Cart::find($cartId)) return $cart;
-        $cart = Cart::create(['user_id' => 0]);
-        $request->session()->put('guest_cart_id', $cart->id);
-        return $cart;
+        $sessionId = $request->session()->getId();
+        $cart = Cart::where('session_id', $sessionId)->first();
+        if ($cart) return $cart;
+        return Cart::create(['session_id' => $sessionId]);
     }
 }
