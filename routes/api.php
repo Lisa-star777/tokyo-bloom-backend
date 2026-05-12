@@ -82,3 +82,18 @@ Route::middleware('auth:sanctum')->post('/test-auth', function (Request $request
         'user' => $request->user()->name
     ]);
 });
+
+Route::get('/test-mail', function () {
+    try {
+        \Illuminate\Support\Facades\Mail::raw('Тестовое письмо из Tokyo Bloom', function ($message) {
+            $message->to('tokyobloom@mail.ru')
+                    ->subject('Тест отправки');
+        });
+        return response()->json(['message' => 'Письмо отправлено успешно']);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+});
