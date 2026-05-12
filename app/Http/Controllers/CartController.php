@@ -9,18 +9,29 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
-        $cart = $request->user()->cart;
+        $user = $request->user();
+        $cart = $user->cart;
         if (!$cart) return response()->json(['items' => []]);
-        $items = $cart->items()->with('product')->get();
-        return response()->json(['items' => $items->map(fn($i) => ['id' => $i->product_id, 'title' => $i->product->title, 'price' => $i->product->price, 'quantity' => $i->quantity]])]);
+        $items = $cart->items()->with('product')->get()->map(function ($item) {
+            return ['id' => $item->product_id, 'title' => $item->product->title, 'price' => $item->product->price, 'quantity' => $item->quantity];
+        });
+        return response()->json(['items' => $items]);
     }
     
     public function addItem(Request $request)
     {
-        $cart = $request->user()->cart ?? $request->user()->cart()->create();
-        $pid = $request->input('product_id'); $qty = $request->input('quantity', 1);
+        $user = $request->user();
+        $cart = $user->cart ?? $user->cart()->create();
+        $pid = $request->input('product_id');
+        $qty = $request->input('quantity', 1);
+        
         $item = CartItem::where('cart_id', $cart->id)->where('product_id', $pid)->first();
-        $item ? ($item->quantity += $qty) && $item->save() : CartItem::create(['cart_id' => $cart->id, 'product_id' => $pid, 'quantity' => $qty]);
+        if ($item) {
+            $item->quantity += $qty;
+            $item->save();
+        } else {
+            CartItem::create(['cart_id' => $cart->id, 'product_id' => $pid, 'quantity' => $qty]);
+        }
         return response()->json(['message' => 'Добавлено']);
     }
     
@@ -29,7 +40,7 @@ class CartController extends Controller
         $cart = $request->user()->cart;
         $item = CartItem::where('cart_id', $cart->id)->where('product_id', $productId)->first();
         $qty = $request->input('quantity', 0);
-        $qty <= 0 ? $item->delete() : ($item->quantity = $qty) && $item->save();
+        if ($qty <= 0) { $item->delete(); } else { $item->quantity = $qty; $item->save(); }
         return response()->json(['message' => 'OK']);
     }
     
@@ -42,7 +53,8 @@ class CartController extends Controller
     
     public function clear(Request $request)
     {
-        $request->user()->cart?->items()->delete();
+        $cart = $request->user()->cart;
+        if ($cart) $cart->items()->delete();
         return response()->json(['message' => 'Очищено']);
     }
 }
