@@ -29,6 +29,19 @@ Route::prefix('v1')->group(function () {
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::post('/feedback', [FeedbackController::class, 'store']);
     
+    // ========== Тест почты ==========
+    Route::get('/test-mail', function () {
+        try {
+            Mail::raw('Тестовое письмо из Tokyo Bloom', function ($message) {
+                $message->to('tokyobloom@mail.ru')
+                        ->subject('Тест отправки');
+            });
+            return response()->json(['message' => 'Письмо отправлено']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    });
+    
     // ========== Аутентификация ==========
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -36,29 +49,24 @@ Route::prefix('v1')->group(function () {
     // ========== Защищенные маршруты ==========
     Route::middleware('auth:sanctum')->group(function () {
         
-        // Профиль
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::put('/user', [AuthController::class, 'update']);
         
-        // Корзина
         Route::get('/cart', [CartController::class, 'index']);
         Route::post('/cart/items', [CartController::class, 'addItem']);
         Route::put('/cart/items/{productId}', [CartController::class, 'updateQuantity']);
         Route::delete('/cart/items/{productId}', [CartController::class, 'removeItem']);
         Route::delete('/cart', [CartController::class, 'clear']);
         
-        // Заказы
         Route::get('/orders', [OrderController::class, 'index']);
         Route::post('/orders', [OrderController::class, 'store']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         
-        // Сертификаты
         Route::post('/certificates', [CertificateController::class, 'store']);
         Route::post('/certificates/validate', [CertificateController::class, 'checkValidity']);
         Route::post('/certificates/use', [CertificateController::class, 'use']);
         
-        // ========== Админские маршруты ==========
         Route::middleware('admin')->prefix('admin')->group(function () {
             Route::apiResource('products', AdminProductController::class);
             Route::get('/orders', [AdminOrderController::class, 'index']);
@@ -76,25 +84,9 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-// Тестовый маршрут с авторизацией
 Route::middleware('auth:sanctum')->post('/test-auth', function (Request $request) {
     return response()->json([
         'message' => 'Auth работает!',
         'user' => $request->user()->name
     ]);
-});
-
-Route::get('/test-mail', function () {
-    try {
-        \Illuminate\Support\Facades\Mail::raw('Тестовое письмо из Tokyo Bloom', function ($message) {
-            $message->to('tokyobloom@mail.ru')
-                    ->subject('Тест отправки');
-        });
-        return response()->json(['message' => 'Письмо отправлено успешно']);
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'line' => $e->getLine()
-        ], 500);
-    }
 });
