@@ -21,12 +21,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::post('/feedback', [FeedbackController::class, 'store']);
     
-    Route::get('/cart', [CartController::class, 'index']);
-    Route::post('/cart/items', [CartController::class, 'addItem']);
-    Route::put('/cart/items/{productId}', [CartController::class, 'updateQuantity']);
-    Route::delete('/cart/items/{productId}', [CartController::class, 'removeItem']);
-    Route::delete('/cart', [CartController::class, 'clear']);
-    
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     
@@ -34,6 +28,13 @@ Route::prefix('v1')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::put('/user', [AuthController::class, 'update']);
+
+        Route::get('/cart', [CartController::class, 'index']);
+        Route::post('/cart/items', [CartController::class, 'addItem']);
+        Route::put('/cart/items/{productId}', [CartController::class, 'updateQuantity']);
+        Route::delete('/cart/items/{productId}', [CartController::class, 'removeItem']);
+        Route::delete('/cart', [CartController::class, 'clear']);
+
         Route::get('/orders', [OrderController::class, 'index']);
         Route::post('/orders', [OrderController::class, 'store']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
