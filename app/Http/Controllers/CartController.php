@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\CartItem;
-use App\Models\Cart;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
     public function index(Request $request)
     {
-        $cart = $this->getCart($request);
+        $user = $request->user();
+        if (!$user) return response()->json(['items' => []]);
+
+        $cart = $user->cart;
         if (!$cart) return response()->json(['items' => []]);
         
         $items = $cart->items()->with('product')->get();
@@ -19,7 +21,6 @@ class CartController extends Controller
                 'id' => $item->product_id,
                 'title' => $item->product->title,
                 'price' => $item->product->price,
-                'description' => $item->product->description,
                 'quantity' => $item->quantity,
             ];
         })]);
@@ -27,12 +28,15 @@ class CartController extends Controller
     
     public function addItem(Request $request)
     {
+        $user = $request->user();
+        if (!$user) return response()->json(['message' => 'Требуется авторизация'], 401);
+
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'integer|min:1|max:99',
         ]);
         
-        $cart = $this->getOrCreateCart($request);
+        $cart = $user->cart ?? $user->cart()->create();
         $quantity = $validated['quantity'] ?? 1;
         
         $cartItem = CartItem::where('cart_id', $cart->id)
@@ -50,7 +54,7 @@ class CartController extends Controller
     
     public function updateQuantity(Request $request, $productId)
     {
-        $cart = $this->getCart($request);
+        $cart = $request->user()->cart;
         if (!$cart) return response()->json(['message' => 'Корзина пуста'], 404);
         
         $cartItem = CartItem::where('cart_id', $cart->id)->where('product_id', $productId)->first();
@@ -64,35 +68,15 @@ class CartController extends Controller
     
     public function removeItem($productId)
     {
-        $cart = $this->getCart(request());
+        $cart = request()->user()->cart;
         if ($cart) CartItem::where('cart_id', $cart->id)->where('product_id', $productId)->delete();
         return response()->json(['message' => 'Удалено']);
     }
     
     public function clear(Request $request)
     {
-        $cart = $this->getCart($request);
+        $cart = $request->user()->cart;
         if ($cart) $cart->items()->delete();
         return response()->json(['message' => 'Очищено']);
-    }
-    
-    private function getCart(Request $request)
-    {
-        if ($user = $request->user()) {
-            return $user->cart;
-        }
-        $sessionId = $request->session()->getId();
-        return Cart::where('session_id', $sessionId)->first();
-    }
-    
-    private function getOrCreateCart(Request $request)
-    {
-        if ($user = $request->user()) {
-            return $user->cart ?? $user->cart()->create();
-        }
-        $sessionId = $request->session()->getId();
-        $cart = Cart::where('session_id', $sessionId)->first();
-        if ($cart) return $cart;
-        return Cart::create(['session_id' => $sessionId]);
     }
 }
