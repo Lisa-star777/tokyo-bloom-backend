@@ -28,12 +28,13 @@ class FeedbackController extends Controller
             'reply_text' => 'required|string|min:1',
         ]);
         
-        try {
-            Mail::to($feedback->email)->send(new FeedbackReply($feedback->name, $validated['reply_text']));
-            $feedback->update(['status' => 'read']);
-            return response()->json(['message' => 'Ответ отправлен успешно']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        $feedback->update(['status' => 'read']);
+        
+        return response()->json([
+            'message' => 'Ответ сохранён',
+            'reply' => $validated['reply_text'],
+            'email' => $feedback->email,
+            'name' => $feedback->name
+        ]);
     }
 }

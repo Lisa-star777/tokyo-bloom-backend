@@ -4,34 +4,29 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class FeedbackReply extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $userName;
+    public $name;
     public $replyText;
 
-    public function __construct($userName, $replyText)
+    public function __construct($name, $replyText)
     {
-        $this->userName = $userName;
+        $this->name = $name;
         $this->replyText = $replyText;
     }
 
-    public function envelope(): Envelope
+    public function build()
     {
-        return new Envelope(
-            subject: 'Ответ на ваше сообщение',
-        );
-    }
-
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.feedback-reply',
-        );
+        return $this->from('tokyobloom@mail.ru', 'Tokyo Bloom')
+                    ->subject('Ответ на ваше сообщение')
+                    ->view('emails.feedback-reply')
+                    ->with([
+                        'name' => $this->name,
+                        'replyText' => $this->replyText,
+                    ]);
     }
 }

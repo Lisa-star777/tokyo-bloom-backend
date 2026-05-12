@@ -15,49 +15,32 @@ use App\Http\Controllers\Admin\CertificateController as AdminCertificateControll
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\DashboardController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
-
 Route::prefix('v1')->group(function () {
    
-    // ========== Публичные маршруты ==========
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::post('/feedback', [FeedbackController::class, 'store']);
     
-    // Корзина (доступна всем, даже гостям)
     Route::get('/cart', [CartController::class, 'index']);
     Route::post('/cart/items', [CartController::class, 'addItem']);
     Route::put('/cart/items/{productId}', [CartController::class, 'updateQuantity']);
     Route::delete('/cart/items/{productId}', [CartController::class, 'removeItem']);
     Route::delete('/cart', [CartController::class, 'clear']);
     
-    // ========== Аутентификация ==========
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     
-    // ========== Защищенные маршруты ==========
     Route::middleware('auth:sanctum')->group(function () {
-        
-        // Профиль
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::put('/user', [AuthController::class, 'update']);
-        
-        // Заказы
         Route::get('/orders', [OrderController::class, 'index']);
         Route::post('/orders', [OrderController::class, 'store']);
         Route::get('/orders/{order}', [OrderController::class, 'show']);
-        
-        // Сертификаты
         Route::post('/certificates', [CertificateController::class, 'store']);
         Route::post('/certificates/validate', [CertificateController::class, 'checkValidity']);
         Route::post('/certificates/use', [CertificateController::class, 'use']);
         
-        // ========== Админские маршруты ==========
         Route::middleware('admin')->prefix('admin')->group(function () {
             Route::apiResource('products', AdminProductController::class);
             Route::get('/orders', [AdminOrderController::class, 'index']);
