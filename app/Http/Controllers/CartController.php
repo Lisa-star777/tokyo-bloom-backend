@@ -31,35 +31,23 @@ class CartController extends Controller
         $user = $request->user();
         if (!$user) return response()->json(['message' => 'Требуется авторизация'], 401);
 
-        $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'integer|min:1|max:99',
-        ]);
-        
+        $validated = $request->validate(['product_id' => 'required|exists:products,id', 'quantity' => 'integer|min:1|max:99']);
         $cart = $user->cart ?? $user->cart()->create();
         $quantity = $validated['quantity'] ?? 1;
         
-        $cartItem = CartItem::where('cart_id', $cart->id)
-            ->where('product_id', $validated['product_id'])->first();
+        $cartItem = CartItem::where('cart_id', $cart->id)->where('product_id', $validated['product_id'])->first();
+        if ($cartItem) { $cartItem->quantity += $quantity; $cartItem->save(); }
+        else { CartItem::create(['cart_id' => $cart->id, 'product_id' => $validated['product_id'], 'quantity' => $quantity]); }
         
-        if ($cartItem) {
-            $cartItem->quantity += $quantity;
-            $cartItem->save();
-        } else {
-            CartItem::create(['cart_id' => $cart->id, 'product_id' => $validated['product_id'], 'quantity' => $quantity]);
-        }
-        
-        return response()->json(['message' => 'Товар добавлен', 'cart_count' => $cart->items()->sum('quantity')]);
+        return response()->json(['message' => 'Товар добавлен']);
     }
     
     public function updateQuantity(Request $request, $productId)
     {
         $cart = $request->user()->cart;
         if (!$cart) return response()->json(['message' => 'Корзина пуста'], 404);
-        
         $cartItem = CartItem::where('cart_id', $cart->id)->where('product_id', $productId)->first();
         if (!$cartItem) return response()->json(['message' => 'Товар не найден'], 404);
-        
         $quantity = $request->input('quantity', 0);
         if ($quantity <= 0) { $cartItem->delete(); return response()->json(['message' => 'Удалено']); }
         $cartItem->quantity = $quantity; $cartItem->save();
