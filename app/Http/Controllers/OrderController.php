@@ -39,7 +39,7 @@ class OrderController extends Controller
                 $subtotal += $item->product->price * $item->quantity;
             }
             
-            $deliveryCost = $subtotal > 5000 ? 0 : 300;
+            $deliveryCost = 0;
             $certificateDiscount = $request->input('certificateUsed.discount', 0);
             $bonusesUsed = $request->input('bonusesUsed', 0);
             
