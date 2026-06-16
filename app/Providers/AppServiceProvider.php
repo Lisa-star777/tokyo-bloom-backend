@@ -19,12 +19,6 @@ class AppServiceProvider extends ServiceProvider
             } catch (\Exception $e) {}
 
             try {
-                if (\App\Models\Product::count() === 0) {
-                    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'ProductsSeeder', '--force' => true]);
-                }
-            } catch (\Exception $e) {}
-
-            try {
                 if (\App\Models\User::where('is_admin', true)->count() === 0) {
                     \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'AdminUserSeeder', '--force' => true]);
                 }
