@@ -15,6 +15,12 @@ use App\Http\Controllers\Admin\CertificateController as AdminCertificateControll
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\DashboardController;
 
+// Временный маршрут для удаления всех товаров
+Route::get('/clear-products', function () {
+    \App\Models\Product::truncate();
+    return response()->json(['message' => 'Все товары удалены']);
+});
+
 Route::prefix('v1')->group(function () {
    
     Route::get('/products', [ProductController::class, 'index']);
