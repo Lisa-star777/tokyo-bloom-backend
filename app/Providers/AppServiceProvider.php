@@ -18,26 +18,24 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-    {
-        // Не выполняем запросы к БД при запуске artisan команд (сборка, миграции)
-        if ($this->app->runningInConsole()) {
-            return;
-        }
-
-        // Создать админа если нет
-        if (app()->environment('production') && \App\Models\User::where('is_admin', true)->count() === 0) {
-            \Illuminate\Support\Facades\Artisan::call('db:seed', [
-                '--class' => 'AdminUserSeeder',
-                '--force' => true
-            ]);
-        }
-        
-        // Создать товары если нет
-        if (app()->environment('production') && \App\Models\Product::count() === 0) {
-            \Illuminate\Support\Facades\Artisan::call('db:seed', [
-                '--class' => 'ProductsSeeder',
-                '--force' => true
-            ]);
+        {
+            if (!$this->app->runningInConsole()) {
+                try {
+                    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                } catch (\Exception $e) {}
+                
+                try {
+                    if (\App\Models\Product::count() === 0) {
+                        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'ProductsSeeder', '--force' => true]);
+                    }
+                } catch (\Exception $e) {}
+                
+                try {
+                    if (\App\Models\User::where('is_admin', true)->count() === 0) {
+                        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'AdminUserSeeder', '--force' => true]);
+                    }
+                } catch (\Exception $e) {}
+            }
         }
     }
 }
