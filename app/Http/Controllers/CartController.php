@@ -13,7 +13,14 @@ class CartController extends Controller
         $cart = $user->cart;
         if (!$cart) return response()->json(['items' => []]);
         $items = $cart->items()->with('product')->get()->map(function ($item) {
-            return ['id' => $item->product_id, 'title' => $item->product->title, 'price' => $item->product->price, 'quantity' => $item->quantity];
+            return [
+                'id' => $item->product_id,
+                'title' => $item->product->title,
+                'price' => $item->product->price,
+                'description' => $item->product->description,
+                'image_url' => $item->product->image_url,
+                'quantity' => $item->quantity,
+            ];
         });
         return response()->json(['items' => $items]);
     }
